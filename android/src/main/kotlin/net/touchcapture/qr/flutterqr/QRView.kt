@@ -119,13 +119,37 @@ class QRView(
             barcodeView.decoderFactory = DefaultDecoderFactory(null, null, null, 2)
 
             if (params[PARAMS_CAMERA_FACING] as Int == 1) {
-                barcodeView.cameraSettings?.requestedCameraId = cameraFacingFront
+                barcodeView.cameraSettings?.requestedCameraId = getFrontFacingCameraId()
+            } else if (params[PARAMS_CAMERA_FACING] as Int == 0) {
+                barcodeView.cameraSettings?.requestedCameraId = getBackFacingCameraId()
             }
         } else if (!isPaused) {
             barcodeView.resume()
         }
 
         return barcodeView
+    }
+
+    private fun getFrontFacingCameraId(): Int {
+        val cameraInfo = android.hardware.Camera.CameraInfo()
+        for (cameraId in 0 until android.hardware.Camera.getNumberOfCameras()) {
+            android.hardware.Camera.getCameraInfo(cameraId, cameraInfo)
+            if (cameraInfo.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                return cameraId
+            }
+        }
+        return -1
+    }
+
+    private fun getBackFacingCameraId(): Int {
+        val cameraInfo = android.hardware.Camera.CameraInfo()
+        for (cameraId in 0 until android.hardware.Camera.getNumberOfCameras()) {
+            android.hardware.Camera.getCameraInfo(cameraId, cameraInfo)
+            if (cameraInfo.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK) {
+                return cameraId
+            }
+        }
+        return -1
     }
 
     // region Camera Info
